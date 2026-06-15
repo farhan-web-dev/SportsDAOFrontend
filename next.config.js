@@ -16,6 +16,7 @@ const nextConfig = {
       '@safe-global/safe-apps-sdk': false,
       '@safe-global/safe-apps-provider': false,
       '@walletconnect/ethereum-provider': false,
+      '@react-native-async-storage/async-storage': false,
     };
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     return config;

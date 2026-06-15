@@ -27,7 +27,7 @@ export default function AdminGuard({
   }, [isConnected, isConnecting, isReconnecting, status, address]);
 
   // Show connecting state
-  if (isConnecting || isReconnecting || status === "connecting") {
+  if (isConnecting || isReconnecting) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -41,7 +41,7 @@ export default function AdminGuard({
   }
 
   // Show not connected state
-  if (!isConnected || status === "disconnected") {
+  if (!isConnected) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">

@@ -1,5 +1,31 @@
 import { apiFetch } from "@/lib/api";
 
+export type AIVerdict = {
+  claim: string;
+  status: string;
+  verdict: "TRUE" | "FALSE" | "APPROXIMATE" | "Informational" | string;
+  claimed_value?: number | null;
+  real_val?: number | null;
+  accuracy_pct?: number | null;
+  subject?: string | null;
+  metric?: string | null;
+  sample_size?: number;
+  confidence?: number;
+  message?: string | null;
+  elapsed_ms?: number;
+  insight?: string | null;
+  insight_tags?: string[];
+};
+
+export type AIResults = {
+  status: "pending" | "success" | "failed";
+  filename?: string;
+  fileSizeKb?: number;
+  claimsFound?: number;
+  verdicts?: AIVerdict[];
+  error?: string;
+};
+
 export type Report = {
   _id: string | number;
   title: string;
@@ -7,6 +33,7 @@ export type Report = {
   fileIpfsHash?: string;
   ipfsLink?: string; // Keep for backward compatibility if needed
   price?: string | number;
+  aiResults?: AIResults;
 };
 
 export type PrepareProposalPayload = {

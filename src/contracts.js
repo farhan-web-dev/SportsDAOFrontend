@@ -1,7 +1,7 @@
 import governorAbiFile from "./abis/GovernerContract.json";
 
 // Get governor address from environment variable
-const governorAddress = process.env.NEXT_PUBLIC_GOVERNOR_ADDRESS;
+const governorAddress = "0x26bD2bF50f5C91CAD0E66c215116ECDDCcE9F325";
 
 if (!governorAddress) {
   console.warn(
