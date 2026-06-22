@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { contracts } from "@/src/contracts";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ProposalCardProps {
   proposal: {
@@ -73,6 +74,7 @@ export default function ProposalCard({
     data: onChainState,
     isLoading: isLoadingState,
     error: contractError,
+    refetch: refetchOnChainState,
   } = useReadContract({
     address: isEnabled ? (governorAddress as `0x${string}`) : undefined,
     abi: contracts.governor.abi,
@@ -82,6 +84,8 @@ export default function ProposalCard({
       enabled: isEnabled,
     },
   });
+
+  const queryClient = useQueryClient();
 
   console.log("onChainState", onChainState);
 
@@ -182,6 +186,9 @@ export default function ProposalCard({
     if (isTxSuccess && writeHash) {
       console.log("🎉 Transaction confirmed:", writeHash);
       
+      // Force an immediate refetch of on-chain state so the badge updates
+      refetchOnChainState?.();
+
       // If we just executed (status was Queued -> Executed), update backend
       if (stateNumber === 5) { // 5 is Queued, so if we just ran a tx, likely it was Execute. 
          // Better check: verify which action was taken? 
@@ -218,6 +225,9 @@ export default function ProposalCard({
             body: JSON.stringify(payload),
         });
         console.log(`Backend updated to ${newStatus}`);
+        
+        // Invalidate queries so the lists reload automatically without refresh
+        queryClient.invalidateQueries({ queryKey: ["proposals"] });
       } catch (err) {
         console.error("Failed to update backend", err);
       }

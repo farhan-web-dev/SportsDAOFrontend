@@ -101,6 +101,7 @@ export const useUpdateProposalId = () => {
       updateProposalId(payload, walletAddress),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["proposals"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });
 };

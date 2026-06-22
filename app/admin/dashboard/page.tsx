@@ -24,33 +24,9 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { FileText, Vote, CheckCircle, Clock } from "lucide-react";
-
-// Static data for charts
-const reportsData = [
-  // { month: "Jan", pending: 12, approved: 8, rejected: 2 },
-  // { month: "Feb", pending: 15, approved: 10, rejected: 3 },
-  // { month: "Mar", pending: 18, approved: 12, rejected: 4 },
-  // { month: "Apr", pending: 14, approved: 15, rejected: 2 },
-  { month: "Nov", pending: 4, approved: 2, rejected: 3 },
-  { month: "Dec", pending: 1, approved: 7, rejected: 5 },
-];
-
-const proposalsData = [
-  // { month: "Jan", active: 5, executed: 3, defeated: 1 },
-  // { month: "Feb", active: 7, executed: 4, defeated: 2 },
-  // { month: "Mar", active: 6, executed: 5, defeated: 1 },
-  // { month: "Apr", active: 8, executed: 6, defeated: 2 },
-  { month: "Nov", active: 9, executed: 7, defeated: 1 },
-  { month: "Dec", active: 10, executed: 8, defeated: 2 },
-];
-
-const statusData = [
-  { name: "Active", value: 19, color: "hsl(var(--chart-1))" },
-  { name: "Executed", value: 15, color: "hsl(var(--chart-2))" },
-  { name: "Defeated", value: 3, color: "hsl(var(--chart-3))" },
-  { name: "Pending", value: 5, color: "hsl(var(--chart-4))" },
-];
+import { FileText, Vote, CheckCircle, Clock, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getDashboardStats } from "@/src/apis/admin";
 
 const chartConfig = {
   pending: {
@@ -80,6 +56,41 @@ const chartConfig = {
 };
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await getDashboardStats();
+        if (response.status === "success") {
+          setStats(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <p className="text-muted-foreground">Failed to load dashboard data.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -97,9 +108,9 @@ export default function DashboardPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">20</div>
+            <div className="text-2xl font-bold">{stats.totalReports}</div>
             <p className="text-xs text-muted-foreground">
-              +12% from last month
+              Total reports submitted
             </p>
           </CardContent>
         </Card>
@@ -112,7 +123,7 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
+            <div className="text-2xl font-bold">{stats.pendingReports}</div>
             <p className="text-xs text-muted-foreground">Awaiting review</p>
           </CardContent>
         </Card>
@@ -125,7 +136,7 @@ export default function DashboardPage() {
             <Vote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15</div>
+            <div className="text-2xl font-bold">{stats.activeProposals}</div>
             <p className="text-xs text-muted-foreground">Currently active</p>
           </CardContent>
         </Card>
@@ -138,7 +149,7 @@ export default function DashboardPage() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">17</div>
+            <div className="text-2xl font-bold">{stats.executedProposals}</div>
             <p className="text-xs text-muted-foreground">
               Successfully executed
             </p>
@@ -155,7 +166,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig}>
-              <BarChart data={reportsData}>
+              <BarChart data={stats.reportsData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -175,7 +186,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig}>
-              <LineChart data={proposalsData}>
+              <LineChart data={stats.proposalsData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -214,7 +225,7 @@ export default function DashboardPage() {
           <ChartContainer config={chartConfig} className="h-[300px]">
             <PieChart>
               <Pie
-                data={statusData}
+                data={stats.statusData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -225,7 +236,7 @@ export default function DashboardPage() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {statusData.map((entry, index) => (
+                {stats.statusData.map((entry: { color: string }, index: number) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
